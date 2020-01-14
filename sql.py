@@ -69,20 +69,31 @@ tructType schema = DataTypes.createStructType(new StructField[] {
 
        movieDf = movieDf.withColumn("decade", col("year").minus(1900).divide(10).cast(DataTypes.IntegerType));
         movieDf = movieDf.drop("subject").drop("actor").drop("actores").drop("director").drop("award").drop("file_name").drop("length");
-
-        movieDf.groupBy(col("decade")).agg(max("popularity")).show();
         
-        +------+---------------+
-|decade|max(popularity)|
-+------+---------------+
-|     6|             88|
-|     3|             88|
-|     5|             86|
-|     9|             88|
-|     4|             88|
-|     8|             88|
-|     7|             88|
-|     2|             83|
-+------+---------------+
+        Dataset<Row> maxPopularity = movieDf.groupBy(col("decade")).agg(max("popularity").as("popularity"));
 
-
+        Dataset<Row> joinedDf = movieDf.join(maxPopularity, movieDf.col("decade").equalTo(maxPopularity.col("decade")).and(movieDf.col("popularity").equalTo(maxPopularity.col("popularity"))));
+        
+    +----+--------------------+----------+------+------+----------+
+|year|               title|popularity|decade|decade|popularity|
++----+--------------------+----------+------+------+----------+
+|1980|Happy Birthday to Me|        88|     8|     8|        88|
+|1989|        Final Notice|        88|     8|     8|        88|
+|1985|Gonzo Presents Mu...|        88|     8|     8|        88|
+|1990| Guilty by Suspicion|        88|     9|     9|        88|
+|1935|        Swedenhielms|        88|     3|     3|        88|
+|1991|           Raw Nerve|        88|     9|     9|        88|
+|1988|        Five Corners|        88|     8|     8|        88|
+|1928|    Woman of Affairs|        83|     2|     2|        83|
+|1989|         Let It Ride|        88|     8|     8|        88|
+|1989|      New Year's Day|        88|     8|     8|        88|
+|1970|   Fellini Satyricon|        88|     7|     7|        88|
+|1960|   Time Machine, The|        88|     6|     6|        88|
+|1940|Long Voyage Home,...|        88|     4|     4|        88|
+|1992|           Class Act|        88|     9|     9|        88|
+|1990|   Dangerous Pursuit|        88|     9|     9|        88|
+|1986|  Best of Times, The|        88|     8|     8|        88|
+|1982|Ballad of Narayam...|        88|     8|     8|        88|
+|1986|         Head Office|        88|     8|     8|        88|
+|1985|       Out of Africa|        88|     8|     8|        88|
+|1991|     Great Race, The|        88|     9|     9|        88|
