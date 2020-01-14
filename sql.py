@@ -43,3 +43,6 @@ spark.sql("SELECT stock_symbol, count(dividents) as count_dividents from nyse_di
 spark.sql("SELECT * from problem2 where count_dividents > 50 ").show() # problem 2
 
 
+spark.sql("Select daily.stock_symbol, daily.close_price, div.dividents, div.date from nyse_daily daily join nyse_divi div on daily.stock_symbol = div.stock_symbol and daily.date = div.date WHERE daily.close_price >=100").show() #problem3
+
+
