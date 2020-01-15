@@ -1,0 +1,74 @@
+SparkSession spark = SparkSession.builder()
+                .master("local")
+                .getOrCreate();
+
+        StructType schema = DataTypes.createStructType(new StructField[] {
+                DataTypes.createStructField("year", DataTypes.IntegerType, true),
+                DataTypes.createStructField("length", DataTypes.IntegerType, true),
+                DataTypes.createStructField("title", DataTypes.StringType, true),
+                DataTypes.createStructField("subject", DataTypes.StringType, true),
+                DataTypes.createStructField("actor", DataTypes.StringType, true),
+                DataTypes.createStructField("actores", DataTypes.StringType, true),
+                DataTypes.createStructField("director", DataTypes.StringType, true),
+                DataTypes.createStructField("popularity", DataTypes.IntegerType, true),
+                DataTypes.createStructField("award", DataTypes.StringType, true),
+                DataTypes.createStructField("file_name", DataTypes.StringType, true)
+        });
+
+        Dataset<Row> movieDf = spark.read().format("csv")
+                .schema(schema)
+                .option("sep",";")
+                .option("multiline", true)
+                .load("src/main/resources/movie_datset.txt");
+
+        movieDf = movieDf.withColumn("decade", col("year").minus(1900).divide(10).cast(DataTypes.IntegerType));
+        movieDf = movieDf.drop("subject").drop("actor").drop("actores").drop("director").drop("award").drop("file_name").drop("length");
+
+        Dataset<Row> maxPopularity = movieDf.groupBy(col("decade")).agg(max("popularity").as("popularity"));
+
+        maxPopularity.show(); 
++------+----------+
+|decade|popularity|
++------+----------+
+|     6|        88|
+|     3|        88|
+|     5|        86|
+|     9|        88|
+|     4|        88|
+|     8|        88|
+|     7|        88|
+|     2|        83|
++------+----------+
+
+Dataset<Row> joinedDf = movieDf.join(maxPopularity, movieDf.col("popularity").equalTo(maxPopularity.col("popularity")).and(movieDf.col("decade").equalTo(maxPopularity.col("decade"))))
+                .orderBy(movieDf.col("decade").desc())
+                .drop(movieDf.col("decade"))
+                .drop(movieDf.col("popularity"))
+                .drop(movieDf.col("year"));
+
+        joinedDf.show();
++--------------------+------+----------+
+|               title|decade|popularity|
++--------------------+------+----------+
+| Blood in, Blood Out|     9|        88|
+| Guilty by Suspicion|     9|        88|
+|           Class Act|     9|        88|
+|   Dangerous Pursuit|     9|        88|
+|           Raw Nerve|     9|        88|
+|     Great Race, The|     9|        88|
+|      New Year's Day|     8|        88|
+|  Best of Times, The|     8|        88|
+|Ballad of Narayam...|     8|        88|
+|Gonzo Presents Mu...|     8|        88|
+|Happy Birthday to Me|     8|        88|
+|         Let It Ride|     8|        88|
+|         Head Office|     8|        88|
+|       Out of Africa|     8|        88|
+|        Final Notice|     8|        88|
+|        Five Corners|     8|        88|
+|   Fellini Satyricon|     7|        88|
+|Creature from Bla...|     7|        88|
+|French Connection...|     7|        88|
+|    Jeremiah Johnson|     7|        88|
++--------------------+------+----------+
+only showing top 20 rows
