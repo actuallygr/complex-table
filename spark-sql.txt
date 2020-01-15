@@ -1,0 +1,189 @@
+myNyseDailySchema = StructType([
+  StructField("exchange", StringType(), True),
+  StructField("stock_symbol", StringType(), True),
+  StructField("date", StringType(), False),
+  StructField("open_price", DoubleType(), False),
+  StructField("high_price", DoubleType(), False),
+  StructField("low_price", DoubleType(), False),
+  StructField("close_price", DoubleType(), False),
+  StructField("volume", LongType(), False),
+  StructField("adj_close_price", DoubleType(), False)
+])
+
+nyse_daily = spark.read.format("csv")\
+.schema(myNyseDailySchema)\
+.option("sep","\t")\
+.load("/FileStore/tables/NYSE_daily_1-cb8bb.tsv") #could be any datasource, I am using the databricks community cloud
+
+
+nyse_daily.show()
++--------+------------+---------+----------+----------+---------+-----------+-------+---------------+
+|exchange|stock_symbol|     date|open_price|high_price|low_price|close_price| volume|adj_close_price|
++--------+------------+---------+----------+----------+---------+-----------+-------+---------------+
+|    NYSE|         JEF| 2/8/2010|      25.4|     25.49|    24.78|      24.82|1134300|          24.82|
+|    NYSE|         JEF| 2/5/2010|     24.91|     25.19|    24.08|      25.01|1765200|          25.01|
+|    NYSE|         JEF| 2/4/2010|     26.01|      26.2|    24.85|      24.85|1414400|          24.85|
+|    NYSE|         JEF| 2/3/2010|     26.23|     26.76|    26.22|      26.29|1066000|          26.29|
+|    NYSE|         JEF| 2/2/2010|     26.08|     26.86|    25.78|      26.46|1496400|          26.46|
+|    NYSE|         JEF| 2/1/2010|     25.61|     26.11|    25.36|      26.11|2381800|          26.11|
+|    NYSE|         JEF|1/29/2010|     26.57|      26.8|    25.41|      25.54|2010000|          25.54|
+|    NYSE|         JEF|1/28/2010|      27.4|      27.4|    26.35|      26.36|1708100|          26.36|
+|    NYSE|         JEF|1/27/2010|     26.44|     27.15|    26.42|      27.14|1929700|          27.14|
+|    NYSE|         JEF|1/26/2010|     26.68|     26.99|    26.46|       26.5|1422100|           26.5|
+|    NYSE|         JEF|1/25/2010|     26.88|     27.17|    26.42|      26.73|1296300|          26.73|
+|    NYSE|         JEF|1/22/2010|     26.95|     27.13|    26.48|      26.58|4806900|          26.58|
+|    NYSE|         JEF|1/21/2010|     26.91|     27.15|    25.88|       27.0|4037000|           27.0|
+|    NYSE|         JEF|1/20/2010|     25.81|     27.72|    25.51|       26.8|3740600|           26.8|
+|    NYSE|         JEF|1/19/2010|     25.41|     25.94|    25.38|      25.83|1657700|          25.83|
+|    NYSE|         JEF|1/15/2010|     25.72|     26.02|    25.13|      25.48|3198700|          25.48|
+|    NYSE|         JEF|1/14/2010|      25.4|     25.96|    25.22|      25.82|2090400|          25.82|
+|    NYSE|         JEF|1/13/2010|     25.58|     25.62|    25.27|      25.46|2418900|          25.46|
+|    NYSE|         JEF|1/12/2010|     25.61|     25.83|    25.35|      25.53|3174200|          25.53|
+|    NYSE|         JEF|1/11/2010|     26.08|      26.2|    25.73|      25.93|1534600|          25.93|
++--------+------------+---------+----------+----------+---------+-----------+-------+---------------+
+
+
+yseDividentsSchema = StructType([
+  StructField("exchange", StringType(), True),
+  StructField("stock_symbol", StringType(), True),
+  StructField("date", StringType(), False),
+  StructField("dividents", DoubleType(), False)
+])
+
+nyse_divi = spark.read.format("csv")\
+.schema(nyseDividentsSchema)\
+.option("sep", "\t")\
+.load("/FileStore/tables/NYSE_dividends_1-55339.tsv")
+
+
+nyse_divi.show()
++--------+------------+----------+---------+
+|exchange|stock_symbol|      date|dividents|
++--------+------------+----------+---------+
+|    NYSE|         JAH|12/30/2009|    0.075|
+|    NYSE|         JAH| 9/29/2009|    0.075|
+|    NYSE|         JGT|12/11/2009|    0.377|
+|    NYSE|         JGT| 9/11/2009|    0.377|
+|    NYSE|         JGT| 6/11/2009|    0.377|
+|    NYSE|         JGT| 3/11/2009|    0.377|
+|    NYSE|         JGT|12/11/2008|    0.377|
+|    NYSE|         JGT| 9/11/2008|    0.451|
+|    NYSE|         JGT| 6/11/2008|    0.451|
+|    NYSE|         JGT| 3/12/2008|    0.451|
+|    NYSE|         JGT|12/12/2007|    0.451|
+|    NYSE|         JGT| 9/12/2007|    0.451|
+|    NYSE|         JGT| 6/13/2007|    0.451|
+|    NYSE|         JKG|12/24/2009|    0.327|
+|    NYSE|         JKG| 9/23/2009|    0.223|
+|    NYSE|         JKG| 6/23/2009|    0.177|
+|    NYSE|         JKG| 3/25/2009|    0.171|
+|    NYSE|         JKG|12/29/2008|    0.077|
+|    NYSE|         JKG|12/24/2008|     0.34|
+|    NYSE|         JKG| 6/24/2008|    0.199|
++--------+------------+----------+---------+
+
+
+
+spark.sql("SELECT * from nyse_daily WHERE close_price >= 200 AND volume >= 10000000").show() 
++--------+------------+----------+----------+----------+---------+-----------+--------+---------------+
+|exchange|stock_symbol|      date|open_price|high_price|low_price|close_price|  volume|adj_close_price|
++--------+------------+----------+----------+----------+---------+-----------+--------+---------------+
+|    NYSE|        JNPR| 11/3/2000|     198.0|    216.88|   196.25|     216.13|13424800|         216.13|
+|    NYSE|        JNPR|10/19/2000|    229.13|    234.31|    220.0|     232.58|11323800|         232.58|
+|    NYSE|        JNPR|10/18/2000|    219.38|     235.0|    212.5|     213.88|15463100|         213.88|
+|    NYSE|        JNPR|10/17/2000|    241.75|    241.81|    224.0|     229.19|16734200|         229.19|
+|    NYSE|        JNPR|10/16/2000|    226.75|     244.5|    224.0|      243.0|17288400|          243.0|
+|    NYSE|        JNPR|10/13/2000|    201.75|     229.5|   201.63|      228.5|19565000|          228.5|
+|    NYSE|        JNPR|10/11/2000|     201.5|    219.44|   196.19|      206.0|16487000|          206.0|
+|    NYSE|        JNPR|10/10/2000|     196.5|     211.0|    196.0|     205.94|12586900|         205.94|
+|    NYSE|        JNPR| 10/4/2000|    200.75|    211.63|    191.5|     207.95|11819100|         207.95|
+|    NYSE|        JNPR| 10/3/2000|    212.63|     215.0|    198.0|     201.44|13457300|         201.44|
+|    NYSE|        JNPR| 10/2/2000|    221.94|     224.0|    201.5|     206.13|10621700|         206.13|
+|    NYSE|        JNPR| 9/22/2000|    202.44|    225.94|   202.25|     225.64|12392300|         225.64|
+|    NYSE|        JNPR| 9/20/2000|    211.94|     223.5|    211.5|     220.06|12225300|         220.06|
+|    NYSE|        JNPR| 9/19/2000|    198.38|     213.0|   197.88|     209.92|13482800|         209.92|
+|    NYSE|        JNPR|  9/6/2000|    221.25|    221.63|   207.63|     209.69|15197300|         209.69|
+|    NYSE|        JNPR| 6/13/2000|    229.69|    239.06|   216.25|      237.0|12235000|          118.5|
+|    NYSE|        JNPR|  6/8/2000|    226.38|    242.56|    225.5|      238.0|13748200|          119.0|
+|    NYSE|        JNPR|  6/7/2000|    203.75|    225.44|    203.0|     224.69|11566000|         112.35|
+|    NYSE|        JNPR|  6/2/2000|     201.0|    216.88|    200.0|      214.5|10173400|         107.25|
+|    NYSE|        JNPR| 4/12/2000|    222.44|     230.0|   198.38|     204.13|12961600|         102.07|
++--------+------------+----------+----------+----------+---------+-----------+--------+---------------+
+
+
+
+spark.sql("SELECT stock_symbol, count(dividents) as count_dividents from nyse_divi group by stock_symbol ").createOrReplaceTempView("problem2")
+problem2 = spark.sql("SELECT * from problem2 where count_dividents > 50 ")
+problem2.show()
++------------+---------------+
+|stock_symbol|count_dividents|
++------------+---------------+
+|         JCP|            114|
+|         JEF|             72|
+|         JQC|             55|
+|         JFP|             58|
+|         JPS|             89|
+|         JWN|             81|
+|         JOE|             51|
+|         JHS|             88|
+|         JTP|             91|
+|         JFR|             68|
+|         JHP|             85|
+|         JPC|             60|
+|         JRO|             63|
+|         JNJ|            160|
+|         JCI|             97|
+|         JHI|             99|
+|         JPM|            104|
++------------+---------------+
+
+
+
+spark.sql("Select daily.stock_symbol, daily.close_price, div.dividents, div.date from nyse_daily daily join nyse_divi div on daily.stock_symbol = div.stock_symbol and daily.date = div.date WHERE daily.close_price >=100").show()
+
++------------+-----------+---------+----------+
+|stock_symbol|close_price|dividents|      date|
++------------+-----------+---------+----------+
+|         JNJ|      101.0|     0.18| 5/18/2001|
+|         JNJ|     103.75|     0.14|11/12/1999|
+|         JNJ|     104.37|     0.05| 2/11/1992|
+|         JNJ|     101.62|  0.02625| 8/17/1987|
+|         JNJ|      112.5|  0.00313| 5/20/1974|
+|         JNJ|     102.25|  0.00364| 2/15/1974|
+|         JNJ|     120.25|  0.00261|11/16/1973|
+|         JNJ|     112.75|  0.00261| 8/20/1973|
+|         JNJ|      113.0|  0.00261| 5/21/1973|
+|         JNJ|      124.0|  0.00313| 2/16/1973|
+|         JNJ|     127.25|  0.00209|11/17/1972|
+|         JNJ|     124.75|  0.00209| 8/21/1972|
+|         JNJ|      122.0|  0.00209| 5/22/1972|
+|         JNJ|     106.75|  0.00307| 2/18/1972|
+|         JNJ|     161.63|  0.00209| 2/16/1970|
+|         JPM|     139.31|     0.24|  4/2/1998|
+|         JPM|     110.62|  0.20667|  1/2/1998|
+|         JPM|     120.44|  0.20667| 10/2/1997|
+|         JCI|     107.34|     0.11| 9/12/2007|
+|         JCI|     110.87|     0.11| 6/13/2007|
++------------+-----------+---------+----------+
+
+problem1 = spark.sql("Select * from problem1")
+problem1.write.csv("//HDFS file location")
+
+
+5. Considering the daily data file is available as a Hive table and the dividends data is available as a JSON file on
+HDFS, what are the code changes you need to do in the SparkSQL code?
+
+
+For the getting the data from hive table we use HiveContext
+
+hiveContext = HiveContext(spark)
+
+nyse_daily = hiveContext.sql("Select * from nyse_daily")
+
+nyse_divi = spark.read.format("json")\
+.schema(nyseDividentsSchema)\
+.load(//HDFS location)
+
+
+
+
